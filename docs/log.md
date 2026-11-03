@@ -1,0 +1,5 @@
+- backend project init
+- web project init
+- android project init
+- ios project init
+- embedded project init
