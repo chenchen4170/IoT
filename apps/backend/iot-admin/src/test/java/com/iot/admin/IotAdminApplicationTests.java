@@ -1,5 +1,7 @@
 package com.iot.admin;
 
+import com.jayway.jsonpath.JsonPath;
+import com.iot.admin.logging.TraceIdFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,7 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -32,10 +38,35 @@ class IotAdminApplicationTests {
     private JdbcTemplate jdbc;
 
     @Test
+    @ExtendWith(OutputCaptureExtension.class)
+    void logsControllerInputAndOutput(CapturedOutput output) throws Exception {
+        MvcResult success = mvc.perform(get("/api/admin/health")).andExpect(status().isOk()).andReturn();
+        MvcResult failure = mvc.perform(get("/api/admin/product-categories/999999"))
+                .andExpect(status().isNotFound()).andReturn();
+        String successId = success.getResponse().getHeader(TraceIdFilter.HEADER);
+        String failureId = failure.getResponse().getHeader(TraceIdFilter.HEADER);
+
+        Assertions.assertNotNull(successId);
+        Assertions.assertNotEquals(successId, failureId);
+        Assertions.assertEquals(successId, JsonPath.read(success.getResponse().getContentAsString(), "$.traceId"));
+        Assertions.assertEquals(failureId, JsonPath.read(failure.getResponse().getContentAsString(), "$.traceId"));
+        Assertions.assertTrue(hasLogLine(output, successId,
+                "GET /api/admin/health AdminController.health() input=[]"));
+        Assertions.assertTrue(hasLogLine(output, successId,
+                "GET /api/admin/health AdminController.health() output={"));
+        Assertions.assertTrue(hasLogLine(output, failureId,
+                "GET /api/admin/product-categories/999999 ProductCategoryController.get(..) input=[999999]"));
+        Assertions.assertTrue(hasLogLine(output, failureId,
+                "GET /api/admin/product-categories/999999 ProductCategoryController.get(..) failed"));
+        Assertions.assertTrue(output.getOut().contains("elapsedMs="));
+        Assertions.assertTrue(output.getOut().contains("errorType=ResponseStatusException"));
+    }
+
+    @Test
     void healthUsesCommonResponse() throws Exception {
         mvc.perform(get("/api/admin/health")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.traceId").value(""))
+                .andExpect(jsonPath("$.traceId").isNotEmpty())
                 .andExpect(jsonPath("$.msg").value(""))
                 .andExpect(jsonPath("$.data.status").value("UP"));
     }
@@ -122,5 +153,10 @@ class IotAdminApplicationTests {
                 .andExpect(jsonPath("$.code").value(400));
         mvc.perform(delete(child)).andExpect(status().isNoContent());
         mvc.perform(delete(parent)).andExpect(status().isNoContent());
+    }
+
+    private boolean hasLogLine(CapturedOutput output, String traceId, String message) {
+        return output.getOut().lines().anyMatch(line ->
+                line.contains("API traceId=" + traceId + " " + message));
     }
 }
