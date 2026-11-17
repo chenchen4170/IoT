@@ -6,6 +6,7 @@ import java.util.List;
 import com.iot.admin.product.category.dto.ProductCategoryRequest;
 import com.iot.admin.product.category.dto.ProductCategoryResponse;
 import com.iot.admin.product.category.service.ProductCategoryService;
+import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,11 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/product-categories")
 public class ProductCategoryController {
 
-    private final ProductCategoryService service;
-
-    public ProductCategoryController(ProductCategoryService service) {
-        this.service = service;
-    }
+    @Resource
+    private ProductCategoryService service;
 
     @GetMapping
     public List<ProductCategoryResponse> list() {

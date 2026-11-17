@@ -9,6 +9,7 @@ import com.iot.admin.product.category.dto.ProductCategoryRequest;
 import com.iot.admin.product.category.dto.ProductCategoryResponse;
 import com.iot.admin.product.category.entity.ProductCategory;
 import com.iot.admin.product.category.mapper.ProductCategoryMapper;
+import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class ProductCategoryService {
 
-    private final ProductCategoryMapper mapper;
+    @Resource
+    private ProductCategoryMapper mapper;
 
-    public ProductCategoryService(ProductCategoryMapper mapper) {
-        this.mapper = mapper;
-    }
 
     public List<ProductCategoryResponse> list() {
         return mapper.selectList(new LambdaQueryWrapper<ProductCategory>()
