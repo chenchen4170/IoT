@@ -1,95 +1,121 @@
-import { useEffect, useState } from 'react'
-import { getProductCategories } from './features/product-categories/api'
-import type { ProductCategory } from './features/product-categories/types'
+import { useState } from 'react'
+import heroImg from './assets/hero.png'
+import reactLogo from './assets/react.svg'
+import viteLogo from './assets/vite.svg'
 import './App.css'
 
 function App() {
-  const [categories, setCategories] = useState<ProductCategory[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [requestId, setRequestId] = useState(0)
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    getProductCategories(controller.signal)
-      .then((data) => {
-        setCategories(data)
-        setError('')
-      })
-      .catch((reason: unknown) => {
-        if (!controller.signal.aborted) {
-          setError(reason instanceof Error ? reason.message : '获取产品分类失败')
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false)
-      })
-
-    return () => controller.abort()
-  }, [requestId])
-
-  function refresh() {
-    setError('')
-    setLoading(true)
-    setRequestId((current) => current + 1)
-  }
+  const [count, setCount] = useState(0)
 
   return (
-    <main className="admin-page">
-      <header className="page-header">
-        <div>
-          <p className="section-label">产品管理</p>
-          <h1>产品分类</h1>
+    <>
+      <section id="center">
+        <div className="hero">
+          <img src={heroImg} className="base" width="170" height="179" alt="" />
+          <img src={reactLogo} className="framework" alt="React logo" />
+          <img src={viteLogo} className="vite" alt="Vite logo" />
         </div>
-        <button type="button" onClick={refresh} disabled={loading}>
-          刷新
+        <div>
+          <h1>Get started</h1>
+          <p>
+            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
+          </p>
+        </div>
+        <button
+          type="button"
+          className="counter"
+          onClick={() => setCount((count) => count + 1)}
+        >
+          Count is {count}
         </button>
-      </header>
-
-      <section className="category-section" aria-label="产品分类列表">
-        {error && (
-          <div className="request-error" role="alert">
-            <span>{error}</span>
-            <button type="button" onClick={refresh}>重试</button>
-          </div>
-        )}
-        {loading ? (
-          <p className="table-message" role="status">正在加载产品分类…</p>
-        ) : !error && categories.length === 0 ? (
-          <p className="table-message">暂无产品分类</p>
-        ) : !error ? (
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">分类名称</th>
-                  <th scope="col">分类编码</th>
-                  <th scope="col">上级 ID</th>
-                  <th scope="col">排序</th>
-                  <th scope="col">状态</th>
-                </tr>
-              </thead>
-              <tbody>
-                {categories.map((category) => (
-                  <tr key={category.id}>
-                    <td>{category.categoryName}</td>
-                    <td className="muted">{category.categoryCode}</td>
-                    <td className="muted">{category.parentId ?? '—'}</td>
-                    <td>{category.sortOrder}</td>
-                    <td>
-                      <span className={category.status === 1 ? 'status active' : 'status'}>
-                        {category.status === 1 ? '启用' : '停用'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : null}
       </section>
-    </main>
+
+      <div className="ticks"></div>
+
+      <section id="next-steps">
+        <div id="docs">
+          <svg className="icon" role="presentation" aria-hidden="true">
+            <use href="/icons.svg#documentation-icon"></use>
+          </svg>
+          <h2>Documentation</h2>
+          <p>Your questions, answered</p>
+          <ul>
+            <li>
+              <a href="https://vite.dev/" target="_blank">
+                <img className="logo" src={viteLogo} alt="" />
+                Explore Vite
+              </a>
+            </li>
+            <li>
+              <a href="https://react.dev/" target="_blank">
+                <img className="button-icon" src={reactLogo} alt="" />
+                Learn more
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div id="social">
+          <svg className="icon" role="presentation" aria-hidden="true">
+            <use href="/icons.svg#social-icon"></use>
+          </svg>
+          <h2>Connect with us</h2>
+          <p>Join the Vite community</p>
+          <ul>
+            <li>
+              <a href="https://github.com/vitejs/vite" target="_blank">
+                <svg
+                  className="button-icon"
+                  role="presentation"
+                  aria-hidden="true"
+                >
+                  <use href="/icons.svg#github-icon"></use>
+                </svg>
+                GitHub
+              </a>
+            </li>
+            <li>
+              <a href="https://chat.vite.dev/" target="_blank">
+                <svg
+                  className="button-icon"
+                  role="presentation"
+                  aria-hidden="true"
+                >
+                  <use href="/icons.svg#discord-icon"></use>
+                </svg>
+                Discord
+              </a>
+            </li>
+            <li>
+              <a href="https://x.com/vite_js" target="_blank">
+                <svg
+                  className="button-icon"
+                  role="presentation"
+                  aria-hidden="true"
+                >
+                  <use href="/icons.svg#x-icon"></use>
+                </svg>
+                X.com
+              </a>
+            </li>
+            <li>
+              <a href="https://bsky.app/profile/vite.dev" target="_blank">
+                <svg
+                  className="button-icon"
+                  role="presentation"
+                  aria-hidden="true"
+                >
+                  <use href="/icons.svg#bluesky-icon"></use>
+                </svg>
+                Bluesky
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <div className="ticks"></div>
+      <section id="spacer"></section>
+    </>
   )
 }
 
