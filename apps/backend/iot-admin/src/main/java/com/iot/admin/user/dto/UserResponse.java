@@ -1,7 +1,8 @@
-package com.iot.admin.user;
+package com.iot.admin.user.dto;
 
 import java.time.OffsetDateTime;
 
+import com.iot.admin.user.entity.IotUser;
 public record UserResponse(Long id, String email, String displayName, int status,
                            OffsetDateTime emailVerifiedAt, OffsetDateTime lastLoginAt,
                            OffsetDateTime createdAt, OffsetDateTime updatedAt) {

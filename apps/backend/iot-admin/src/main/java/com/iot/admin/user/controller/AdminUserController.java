@@ -1,11 +1,14 @@
-package com.iot.admin.user;
+package com.iot.admin.user.controller;
 
 import java.util.List;
 
+import com.iot.admin.user.dto.StatusRequest;
+import com.iot.admin.user.dto.UserResponse;
+import com.iot.admin.user.service.AuthService;
+import com.iot.admin.user.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,8 +49,5 @@ public class AdminUserController {
                                      @PathVariable Long id, @Valid @RequestBody StatusRequest request) {
         auth.requireAdmin(authorization);
         return users.updateStatus(id, request.status());
-    }
-
-    public record StatusRequest(@NotNull @Min(0) @Max(1) Integer status) {
     }
 }

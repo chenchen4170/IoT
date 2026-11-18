@@ -1,4 +1,4 @@
-package com.iot.admin.user;
+package com.iot.admin.user.controller;
 
 import com.iot.admin.common.R;
 import jakarta.validation.ConstraintViolationException;

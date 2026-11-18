@@ -1,7 +1,10 @@
-package com.iot.admin.user;
+package com.iot.admin.user.controller;
 
+import com.iot.admin.user.dto.ProfileRequest;
+import com.iot.admin.user.dto.UserResponse;
+import com.iot.admin.user.service.AuthService;
+import com.iot.admin.user.service.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,8 +32,5 @@ public class UserController {
     public UserResponse updateMe(@RequestHeader(value = "Authorization", required = false) String authorization,
                                  @Valid @RequestBody ProfileRequest request) {
         return users.updateDisplayName(auth.requireUser(authorization).getId(), request.displayName());
-    }
-
-    public record ProfileRequest(@Size(max = 100) String displayName) {
     }
 }

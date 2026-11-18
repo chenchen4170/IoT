@@ -1,8 +1,9 @@
-package com.iot.admin.user;
+package com.iot.admin.user.mapper;
 
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.iot.admin.user.entity.IotUser;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;

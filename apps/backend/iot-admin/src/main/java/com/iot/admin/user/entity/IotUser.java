@@ -1,4 +1,4 @@
-package com.iot.admin.user;
+package com.iot.admin.user.entity;
 
 import java.time.OffsetDateTime;
 
