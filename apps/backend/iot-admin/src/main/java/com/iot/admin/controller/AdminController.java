@@ -2,6 +2,8 @@ package com.iot.admin.controller;
 
 import java.util.Map;
 
+import com.iot.admin.exception.BizException;
+import com.iot.admin.exception.ErrorCode;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,5 +15,10 @@ public class AdminController {
     @GetMapping("/health")
     public Map<String, String> health() {
         return Map.of("status", "UP", "service", "iot-admin");
+    }
+
+    @GetMapping("/test/error")
+    public void testError() {
+        throw new BizException(ErrorCode.BAD_REQUEST);
     }
 }
