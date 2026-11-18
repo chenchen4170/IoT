@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Locale;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -75,13 +76,25 @@ public class ControllerLogAspect {
             object.properties().forEach(entry -> {
                 if (isSensitive(entry.getKey())) {
                     object.put(entry.getKey(), MASK);
+                } else if (isBearerToken(entry.getValue())) {
+                    object.put(entry.getKey(), MASK);
                 } else {
                     mask(entry.getValue());
                 }
             });
         } else if (node instanceof ArrayNode array) {
-            array.forEach(this::mask);
+            for (int i = 0; i < array.size(); i++) {
+                if (isBearerToken(array.get(i))) {
+                    array.set(i, TextNode.valueOf(MASK));
+                } else {
+                    mask(array.get(i));
+                }
+            }
         }
+    }
+
+    private boolean isBearerToken(JsonNode node) {
+        return node.isTextual() && node.textValue().regionMatches(true, 0, "Bearer ", 0, 7);
     }
 
     private boolean isSensitive(String field) {

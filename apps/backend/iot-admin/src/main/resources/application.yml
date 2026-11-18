@@ -21,3 +21,7 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+
+auth:
+  access-token-ttl: 15m
+  refresh-token-ttl: 7d
