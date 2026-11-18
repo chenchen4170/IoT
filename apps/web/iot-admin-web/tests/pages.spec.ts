@@ -67,8 +67,10 @@ for (const responseCase of [
     )
 
     await page.goto('/')
+    await page.evaluate(() => localStorage.setItem('iot-admin-token', 'expired-token'))
     await page.getByRole('button', { name: '测试后端接口' }).click()
     await expect(page).toHaveURL(/\/login$/)
+    expect(await page.evaluate(() => localStorage.getItem('iot-admin-token'))).toBeNull()
     await expect(page.getByRole('heading', { name: '登录账号' })).toBeVisible()
     await expect(page.getByText('接口请求成功')).not.toBeVisible()
     const alert = page.getByRole('alert')
@@ -77,7 +79,7 @@ for (const responseCase of [
   })
 }
 
-test('非成功业务码在页面中央展示 msg 并在 2 秒后消失', async ({ page }) => {
+test('非成功业务码展示 msg 并在 2 秒后消失', async ({ page }) => {
   await page.route('**/api/admin/test/auth', (route) =>
     route.fulfill({
       status: 200,
@@ -90,20 +92,71 @@ test('非成功业务码在页面中央展示 msg 并在 2 秒后消失', async 
   await page.getByRole('button', { name: '测试后端接口' }).click()
   const alert = page.getByRole('alert')
   await expect(alert).toHaveText('请求参数错误')
-  const box = await alert.boundingBox()
-  const viewport = page.viewportSize()!
-  expect(box).not.toBeNull()
-  expect(Math.abs(box!.x + box!.width / 2 - viewport.width / 2)).toBeLessThan(2)
-  expect(Math.abs(box!.y + box!.height / 2 - viewport.height / 2)).toBeLessThan(2)
+  const offset = await alert.evaluate((element) => {
+    const box = element.getBoundingClientRect()
+    return Math.abs(box.x + box.width / 2 - window.innerWidth / 2)
+  })
+  expect(offset).toBeLessThan(2)
   await expect(alert).not.toBeVisible({ timeout: 4000 })
   await expect(page).toHaveURL(/\/$/)
 })
 
-test('登录页可以直接访问并提示未接入服务', async ({ page }) => {
+test('登录保存 token 并为后续请求添加 Bearer 头', async ({ page }) => {
+  await page.route('**/api/admin/user/login', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        code: 200,
+        traceId: 'login-trace',
+        msg: '',
+        data: { id: 1, username: 'admin', token: 'test-access-token', refreshToken: 'test-refresh-token' },
+      }),
+    }),
+  )
+  await page.route('**/api/admin/test/auth', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '{"code":200,"traceId":"test-trace","msg":"","data":null}',
+    }),
+  )
+
+  await page.goto('/login')
+  await page.evaluate(() => localStorage.setItem('iot-admin-token', 'old-token'))
+  const loginRequestPromise = page.waitForRequest('**/api/admin/user/login')
+  await page.getByRole('textbox', { name: '用户名' }).fill('admin')
+  await page.getByLabel('密码', { exact: true }).fill('password')
+  await page.locator('button[type="submit"]').click()
+  const loginRequest = await loginRequestPromise
+  expect(loginRequest.method()).toBe('POST')
+  expect(loginRequest.postDataJSON()).toEqual({ username: 'admin', password: 'password' })
+  expect(loginRequest.headers().authorization).toBeUndefined()
+  await expect(page).toHaveURL(/\/$/)
+  expect(await page.evaluate(() => localStorage.getItem('iot-admin-token'))).toBe('test-access-token')
+
+  await page.reload()
+  const authRequestPromise = page.waitForRequest('**/api/admin/test/auth')
+  await page.getByRole('button', { name: '测试后端接口' }).click()
+  const authRequest = await authRequestPromise
+  expect(authRequest.headers().authorization).toBe('Bearer test-access-token')
+  await expect(page.getByText('接口请求成功')).toBeVisible()
+})
+
+test('登录失败时停留在登录页并显示服务端消息', async ({ page }) => {
+  await page.route('**/api/admin/user/login', (route) =>
+    route.fulfill({
+      status: 401,
+      contentType: 'application/json',
+      body: unauthorizedBody,
+    }),
+  )
+
   await page.goto('/login')
   await page.getByRole('textbox', { name: '用户名' }).fill('admin')
   await page.getByLabel('密码', { exact: true }).fill('password')
   await page.locator('button[type="submit"]').click()
-  await expect(page.getByText('登录服务尚未接入', { exact: true })).toBeVisible()
+  await expect(page.getByRole('alert')).toHaveText('Unauthorized')
   await expect(page).toHaveURL(/\/login$/)
+  expect(await page.evaluate(() => localStorage.getItem('iot-admin-token'))).toBeNull()
 })
