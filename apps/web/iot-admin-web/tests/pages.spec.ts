@@ -8,6 +8,97 @@ test('首页可以导航到登录页', async ({ page }) => {
   await expect(page.getByRole('heading', { name: '登录账号' })).toBeVisible()
 })
 
+test('首页按钮请求后端测试接口并记录请求与响应', async ({ page }) => {
+  const logs: string[] = []
+  page.on('console', (entry) => logs.push(entry.text()))
+  await page.route('**/api/admin/test/auth', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '{"code":200,"traceId":"test-trace","msg":"OK","data":null}',
+    }),
+  )
+
+  await page.goto('/')
+  const requestPromise = page.waitForRequest('**/api/admin/test/auth')
+  await page.getByRole('button', { name: '测试后端接口' }).click()
+  const request = await requestPromise
+
+  expect(request.method()).toBe('GET')
+  expect(new URL(request.url()).origin).toBe(new URL(page.url()).origin)
+  await expect(page.getByText('接口请求成功')).toBeVisible()
+  expect(logs.some((log) => log.includes('测试接口请求') && log.includes('GET'))).toBe(true)
+  expect(logs.some((log) => log.includes('测试接口响应') && log.includes('200'))).toBe(true)
+})
+
+test('业务码 201 也视为成功', async ({ page }) => {
+  await page.route('**/api/admin/test/auth', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '{"code":201,"traceId":"test-trace","msg":"Created","data":null}',
+    }),
+  )
+
+  await page.goto('/')
+  await page.getByRole('button', { name: '测试后端接口' }).click()
+  await expect(page.getByText('接口请求成功')).toBeVisible()
+  await expect(page.getByRole('alert')).not.toBeVisible()
+})
+
+const unauthorizedBody = JSON.stringify({
+  code: 401,
+  traceId: '0f8ecebbb9a1408bbb829b588b8858ec',
+  msg: 'Unauthorized',
+  data: null,
+})
+
+for (const responseCase of [
+  { name: 'HTTP 401', status: 401 },
+  { name: '业务码 401', status: 200 },
+]) {
+  test(`${responseCase.name} 会跳转登录页`, async ({ page }) => {
+    await page.route('**/api/admin/test/auth', (route) =>
+      route.fulfill({
+        status: responseCase.status,
+        contentType: 'application/json',
+        body: unauthorizedBody,
+      }),
+    )
+
+    await page.goto('/')
+    await page.getByRole('button', { name: '测试后端接口' }).click()
+    await expect(page).toHaveURL(/\/login$/)
+    await expect(page.getByRole('heading', { name: '登录账号' })).toBeVisible()
+    await expect(page.getByText('接口请求成功')).not.toBeVisible()
+    const alert = page.getByRole('alert')
+    await expect(alert).toHaveText('Unauthorized')
+    await expect(alert).not.toBeVisible({ timeout: 4000 })
+  })
+}
+
+test('非成功业务码在页面中央展示 msg 并在 2 秒后消失', async ({ page }) => {
+  await page.route('**/api/admin/test/auth', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '{"code":400,"traceId":"test-trace","msg":"请求参数错误","data":null}',
+    }),
+  )
+
+  await page.goto('/')
+  await page.getByRole('button', { name: '测试后端接口' }).click()
+  const alert = page.getByRole('alert')
+  await expect(alert).toHaveText('请求参数错误')
+  const box = await alert.boundingBox()
+  const viewport = page.viewportSize()!
+  expect(box).not.toBeNull()
+  expect(Math.abs(box!.x + box!.width / 2 - viewport.width / 2)).toBeLessThan(2)
+  expect(Math.abs(box!.y + box!.height / 2 - viewport.height / 2)).toBeLessThan(2)
+  await expect(alert).not.toBeVisible({ timeout: 4000 })
+  await expect(page).toHaveURL(/\/$/)
+})
+
 test('登录页可以直接访问并提示未接入服务', async ({ page }) => {
   await page.goto('/login')
   await page.getByRole('textbox', { name: '用户名' }).fill('admin')

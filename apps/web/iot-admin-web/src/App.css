@@ -23,6 +23,12 @@
 h1, h2, h3, p { margin-top: 0; }
 .welcome h1, .login-intro h1 { margin-bottom: 16px; color: #142b31; font-size: clamp(32px, 4vw, 48px); font-weight: 700; line-height: 1.2; }
 .lead { margin-bottom: 32px; color: #5e7076; font-size: 17px; }
+.welcome-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.welcome-actions .ant-btn { height: 42px; }
+.api-error-alert {
+  position: fixed; top: 20%; left: 50%; z-index: 1000;
+  width: min(420px, calc(100vw - 32px)); transform: translate(-50%, -50%);
+}
 .primary-link {
   min-height: 42px; display: inline-flex; align-items: center; gap: 18px; padding: 0 18px;
   border-radius: 4px; background: #116b66; color: #fff; font-size: 14px; font-weight: 600;
