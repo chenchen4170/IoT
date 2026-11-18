@@ -7,3 +7,4 @@
 - Spring Test
 - MyBatis Plus
 - PostgreSQL
+- Redis
