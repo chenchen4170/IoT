@@ -1,9 +1,3 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:categories;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
-    username: sa
-    password:
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:db/test-schema.sql
+    url: jdbc:sqlite:file:iot-admin-test?mode=memory&cache=shared
