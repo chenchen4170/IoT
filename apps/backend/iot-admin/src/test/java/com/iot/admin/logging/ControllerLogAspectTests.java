@@ -2,6 +2,8 @@ package com.iot.admin.logging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+
+import com.iot.admin.aspect.ControllerLogAspect;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

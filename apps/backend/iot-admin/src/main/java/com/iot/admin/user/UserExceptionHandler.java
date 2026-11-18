@@ -1,6 +1,6 @@
 package com.iot.admin.user;
 
-import com.iot.admin.response.R;
+import com.iot.admin.common.R;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

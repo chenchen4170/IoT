@@ -1,4 +1,4 @@
-package com.iot.admin.response;
+package com.iot.admin.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

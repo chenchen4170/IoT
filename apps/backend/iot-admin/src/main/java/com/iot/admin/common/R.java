@@ -1,6 +1,5 @@
-package com.iot.admin.response;
+package com.iot.admin.common;
 
-import com.iot.admin.logging.TraceIdFilter;
 import org.slf4j.MDC;
 
 public record R<T>(int code, String traceId, String msg, T data) {

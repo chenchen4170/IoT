@@ -1,4 +1,4 @@
-package com.iot.admin.logging;
+package com.iot.admin.common;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

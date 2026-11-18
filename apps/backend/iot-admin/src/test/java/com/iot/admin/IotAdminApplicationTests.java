@@ -1,7 +1,7 @@
 package com.iot.admin;
 
 import com.jayway.jsonpath.JsonPath;
-import com.iot.admin.logging.TraceIdFilter;
+import com.iot.admin.common.TraceIdFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

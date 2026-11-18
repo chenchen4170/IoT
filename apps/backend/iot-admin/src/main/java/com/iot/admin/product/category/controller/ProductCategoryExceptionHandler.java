@@ -1,6 +1,6 @@
 package com.iot.admin.product.category.controller;
 
-import com.iot.admin.response.R;
+import com.iot.admin.common.R;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
