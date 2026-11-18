@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -21,6 +23,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.test.util.ReflectionTestUtils;
 
 class TokenStoreTests {
@@ -63,5 +66,27 @@ class TokenStoreTests {
         assertTrue(store.isRefreshActive(otherUser.refresh()));
         assertThrows(BizException.class, () -> store.requireActive("not-a-jwt"));
         verify(values, times(2)).set(eq("auth:session:42"), anyString(), eq(Duration.ofDays(7)));
+    }
+
+    @Test
+    void failedAtomicRotationDoesNotReturnNewTokens() {
+        StringRedisTemplate redis = mock(StringRedisTemplate.class);
+        @SuppressWarnings("unchecked")
+        ValueOperations<String, String> values = mock(ValueOperations.class);
+        when(redis.opsForValue()).thenReturn(values);
+        when(values.get(anyString())).thenReturn("session:42." + "a".repeat(43));
+        when(redis.execute(isA(RedisScript.class), anyList(), anyString(), anyString(), anyString()))
+                .thenReturn(0L);
+
+        TokenStore store = new TokenStore();
+        ReflectionTestUtils.setField(store, "redis", redis);
+        ReflectionTestUtils.setField(store, "jwtService", new JwtService(
+                "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=", Duration.ofMinutes(15)));
+        ReflectionTestUtils.setField(store, "refreshTokenTtl", Duration.ofDays(7));
+
+        assertEquals(42L, store.refreshUserId("42." + "a".repeat(43)));
+        assertThrows(BizException.class, () -> store.refresh(42L, "alice", "42." + "a".repeat(43)));
+        assertThrows(BizException.class, () -> store.refreshUserId("42.invalid"));
+        assertThrows(BizException.class, () -> store.refreshUserId("99999999999999999999." + "a".repeat(43)));
     }
 }

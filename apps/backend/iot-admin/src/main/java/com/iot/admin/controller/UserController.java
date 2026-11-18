@@ -4,6 +4,8 @@ import com.iot.admin.dto.LoginRequest;
 import com.iot.admin.dto.LoginResponse;
 import com.iot.admin.dto.RegisterRequest;
 import com.iot.admin.dto.RegisterResponse;
+import com.iot.admin.dto.RefreshTokenRequest;
+import com.iot.admin.dto.RefreshTokenResponse;
 import com.iot.admin.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -33,5 +35,8 @@ public class UserController {
         return userService.login(request);
     }
 
-
+    @PostMapping("/refreshToken")
+    public RefreshTokenResponse refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        return userService.refreshToken(request);
+    }
 }

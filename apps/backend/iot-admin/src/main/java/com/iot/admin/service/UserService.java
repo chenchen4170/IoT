@@ -5,6 +5,8 @@ import com.iot.admin.dto.LoginRequest;
 import com.iot.admin.dto.LoginResponse;
 import com.iot.admin.dto.RegisterRequest;
 import com.iot.admin.dto.RegisterResponse;
+import com.iot.admin.dto.RefreshTokenRequest;
+import com.iot.admin.dto.RefreshTokenResponse;
 import com.iot.admin.entity.IotUser;
 import com.iot.admin.exception.BizException;
 import com.iot.admin.exception.ErrorCode;
@@ -58,6 +60,16 @@ public class UserService {
         }
         TokenStore.Tokens tokens = tokenStore.issue(user.getId(), user.getUsername());
         return new LoginResponse(user.getId(), user.getUsername(), tokens.access(), tokens.refresh());
+    }
+
+    public RefreshTokenResponse refreshToken(RefreshTokenRequest request) {
+        Long userId = tokenStore.refreshUserId(request.refreshToken());
+        IotUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BizException(ErrorCode.UNAUTHORIZED);
+        }
+        TokenStore.Tokens tokens = tokenStore.refresh(user.getId(), user.getUsername(), request.refreshToken());
+        return new RefreshTokenResponse(tokens.access(), tokens.refresh());
     }
 
     private IotUser findByUsername(String username) {

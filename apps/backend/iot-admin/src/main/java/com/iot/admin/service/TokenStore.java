@@ -6,14 +6,25 @@ import jakarta.annotation.Resource;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TokenStore {
+
+    private static final DefaultRedisScript<Long> ROTATE_SESSION = new DefaultRedisScript<>(
+            """
+            if redis.call('GET', KEYS[1]) == ARGV[1] then
+                redis.call('SET', KEYS[1], ARGV[2], 'PX', ARGV[3])
+                return 1
+            end
+            return 0
+            """, Long.class);
 
     private final SecureRandom random = new SecureRandom();
 
@@ -32,6 +43,34 @@ public class TokenStore {
         String access = jwtService.issue(userId, username, sessionId);
         redis.opsForValue().set(sessionKey(userId), sessionId + ":" + refresh, refreshTokenTtl);
         return new Tokens(access, refresh);
+    }
+
+    public Long refreshUserId(String refreshToken) {
+        if (refreshToken == null || !refreshToken.matches("[1-9][0-9]*\\.[A-Za-z0-9_-]{43}")) {
+            throw new BizException(ErrorCode.UNAUTHORIZED);
+        }
+        try {
+            return Long.valueOf(refreshToken.substring(0, refreshToken.indexOf('.')));
+        } catch (NumberFormatException exception) {
+            throw new BizException(ErrorCode.UNAUTHORIZED);
+        }
+    }
+
+    public Tokens refresh(Long userId, String username, String refreshToken) {
+        String key = sessionKey(userId);
+        String current = redis.opsForValue().get(key);
+        if (current == null || !current.endsWith(":" + refreshToken)) {
+            throw new BizException(ErrorCode.UNAUTHORIZED);
+        }
+        String sessionId = newToken();
+        String nextRefresh = userId + "." + newToken();
+        String access = jwtService.issue(userId, username, sessionId);
+        Long changed = redis.execute(ROTATE_SESSION, Collections.singletonList(key),
+                current, sessionId + ":" + nextRefresh, String.valueOf(refreshTokenTtl.toMillis()));
+        if (!Long.valueOf(1).equals(changed)) {
+            throw new BizException(ErrorCode.UNAUTHORIZED);
+        }
+        return new Tokens(access, nextRefresh);
     }
 
     public Jwt requireActive(String accessToken) {
