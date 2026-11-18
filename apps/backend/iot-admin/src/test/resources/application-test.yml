@@ -1,3 +1,6 @@
 spring:
   datasource:
     url: jdbc:sqlite:file:iot-admin-test?mode=memory&cache=shared
+
+auth:
+  jwt-secret: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=

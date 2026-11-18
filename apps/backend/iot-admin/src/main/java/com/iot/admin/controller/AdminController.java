@@ -21,4 +21,9 @@ public class AdminController {
     public void testError() {
         throw new BizException(ErrorCode.BAD_REQUEST);
     }
+
+    @GetMapping("/test/auth")
+    public Map<String, String> testAuth() {
+        return Map.of("status", "AUTHORIZED");
+    }
 }

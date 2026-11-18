@@ -56,7 +56,7 @@ public class UserService {
         if (user == null || !passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new BizException(ErrorCode.UNAUTHORIZED);
         }
-        TokenStore.Tokens tokens = tokenStore.issue(user.getId());
+        TokenStore.Tokens tokens = tokenStore.issue(user.getId(), user.getUsername());
         return new LoginResponse(user.getId(), user.getUsername(), tokens.access(), tokens.refresh());
     }
 
