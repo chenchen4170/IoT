@@ -10,6 +10,13 @@ public enum ErrorCode {
     CONFLICT(HttpStatus.CONFLICT, "Conflict"),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
 
+    //PRODUCT_CATEGORY_xxxx
+
+
+    //PRODUCT_xxxx
+
+
+
     private final HttpStatus status;
     private final String message;
 
