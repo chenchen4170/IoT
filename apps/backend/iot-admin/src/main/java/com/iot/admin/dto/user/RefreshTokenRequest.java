@@ -1,4 +1,4 @@
-package com.iot.admin.dto;
+package com.iot.admin.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 

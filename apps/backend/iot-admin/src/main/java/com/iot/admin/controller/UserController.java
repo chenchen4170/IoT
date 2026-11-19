@@ -1,11 +1,11 @@
 package com.iot.admin.controller;
 
-import com.iot.admin.dto.LoginRequest;
-import com.iot.admin.dto.LoginResponse;
-import com.iot.admin.dto.RegisterRequest;
-import com.iot.admin.dto.RegisterResponse;
-import com.iot.admin.dto.RefreshTokenRequest;
-import com.iot.admin.dto.RefreshTokenResponse;
+import com.iot.admin.dto.user.LoginRequest;
+import com.iot.admin.dto.user.LoginResponse;
+import com.iot.admin.dto.user.RegisterRequest;
+import com.iot.admin.dto.user.RegisterResponse;
+import com.iot.admin.dto.user.RefreshTokenRequest;
+import com.iot.admin.dto.user.RefreshTokenResponse;
 import com.iot.admin.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;

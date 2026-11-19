@@ -1,12 +1,12 @@
 package com.iot.admin.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.iot.admin.dto.LoginRequest;
-import com.iot.admin.dto.LoginResponse;
-import com.iot.admin.dto.RegisterRequest;
-import com.iot.admin.dto.RegisterResponse;
-import com.iot.admin.dto.RefreshTokenRequest;
-import com.iot.admin.dto.RefreshTokenResponse;
+import com.iot.admin.dto.user.LoginRequest;
+import com.iot.admin.dto.user.LoginResponse;
+import com.iot.admin.dto.user.RegisterRequest;
+import com.iot.admin.dto.user.RegisterResponse;
+import com.iot.admin.dto.user.RefreshTokenRequest;
+import com.iot.admin.dto.user.RefreshTokenResponse;
 import com.iot.admin.entity.IotUser;
 import com.iot.admin.exception.BizException;
 import com.iot.admin.exception.ErrorCode;
