@@ -1,36 +1,33 @@
 package com.iot.admin.exception;
 
-import org.springframework.http.HttpStatus;
-
 public enum ErrorCode {
-    BAD_REQUEST(HttpStatus.BAD_REQUEST, "Invalid request"),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
-    FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden"),
-    NOT_FOUND(HttpStatus.NOT_FOUND, "Not found"),
-    CONFLICT(HttpStatus.CONFLICT, "Conflict"),
-    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+    BAD_REQUEST("400", "Invalid request"),
+    UNAUTHORIZED("401", "Unauthorized"),
+    FORBIDDEN("403", "Forbidden"),
+    NOT_FOUND("404", "Not found"),
+    CONFLICT("409", "Conflict"),
+    INTERNAL_ERROR("500", "Internal server error"),
 
     //PRODUCT_CATEGORY_xxxx
-
+    PRODUCT_CATEGORY_CODE_EXISTS("PRODUCT_CATEGORY_0001", "Category code already exists"),
+    PRODUCT_CATEGORY_PARENT_INVALID("PRODUCT_CATEGORY_0002", "Parent category not found"),
 
     //PRODUCT_xxxx
 
+    ;
 
 
-    private final HttpStatus status;
+
+    private final String code;
     private final String message;
 
-    ErrorCode(HttpStatus status, String message) {
-        this.status = status;
+    ErrorCode(String code, String message) {
+        this.code = code;
         this.message = message;
     }
 
-    public int getCode() {
-        return status.value();
-    }
-
-    public HttpStatus getStatus() {
-        return status;
+    public String getCode() {
+        return code;
     }
 
     public String getMessage() {

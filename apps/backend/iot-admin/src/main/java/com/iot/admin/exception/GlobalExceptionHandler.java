@@ -22,9 +22,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BizException.class)
     public ResponseEntity<R<Void>> business(BizException exception) {
-        ErrorCode errorCode = exception.getErrorCode();
-        return ResponseEntity.status(errorCode.getStatus())
-                .body(R.error(errorCode.getCode(), exception.getMessage()));
+        return error(exception.getErrorCode());
     }
 
     @ExceptionHandler(ResponseStatusException.class)
@@ -35,7 +33,7 @@ public class GlobalExceptionHandler {
                 ? (knownStatus == null ? "HTTP " + status : knownStatus.getReasonPhrase())
                 : exception.getReason();
         return ResponseEntity.status(exception.getStatusCode())
-                .body(R.error(status, message));
+                .body(R.error(Integer.toString(status), message));
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class, HandlerMethodValidationException.class,
@@ -52,7 +50,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<R<Void>> methodNotAllowed(HttpRequestMethodNotSupportedException exception) {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(R.error(HttpStatus.METHOD_NOT_ALLOWED.value(), "Method not allowed"));
+                .body(R.error(Integer.toString(HttpStatus.METHOD_NOT_ALLOWED.value()), "Method not allowed"));
     }
 
     @ExceptionHandler(Exception.class)
@@ -62,7 +60,15 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<R<Void>> error(ErrorCode errorCode) {
-        return ResponseEntity.status(errorCode.getStatus())
+        HttpStatus status = switch (errorCode) {
+            case BAD_REQUEST, PRODUCT_CATEGORY_PARENT_INVALID -> HttpStatus.BAD_REQUEST;
+            case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case CONFLICT, PRODUCT_CATEGORY_CODE_EXISTS -> HttpStatus.CONFLICT;
+            case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
+        return ResponseEntity.status(status)
                 .body(R.error(errorCode.getCode(), errorCode.getMessage()));
     }
 }

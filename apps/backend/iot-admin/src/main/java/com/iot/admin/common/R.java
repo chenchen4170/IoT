@@ -2,13 +2,13 @@ package com.iot.admin.common;
 
 import org.slf4j.MDC;
 
-public record R<T>(int code, String traceId, String msg, T data) {
+public record R<T>(String code, String traceId, String msg, T data) {
 
-    public static <T> R<T> of(int code, T data) {
-        return new R<>(code, currentTraceId(), "", data);
+    public static <T> R<T> of(int status, T data) {
+        return new R<>(Integer.toString(status), currentTraceId(), "", data);
     }
 
-    public static R<Void> error(int code, String msg) {
+    public static R<Void> error(String code, String msg) {
         return new R<>(code, currentTraceId(), msg, null);
     }
 

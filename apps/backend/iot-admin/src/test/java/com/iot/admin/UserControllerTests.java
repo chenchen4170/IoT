@@ -95,7 +95,7 @@ class UserControllerTests {
                                 {"username":"Alice","password":"secret-123","confirmPassword":"secret-123"}
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.code").value(201))
+                .andExpect(jsonPath("$.code").value("201"))
                 .andExpect(jsonPath("$.data.id").isNumber())
                 .andExpect(jsonPath("$.data.username").value("Alice"))
                 .andExpect(jsonPath("$.data.createAt").isNotEmpty())
@@ -173,7 +173,7 @@ class UserControllerTests {
         mvc.perform(get("/api/admin/user/protected")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer malformed"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(401));
+                .andExpect(jsonPath("$.code").value("401"));
     }
 
     @Test

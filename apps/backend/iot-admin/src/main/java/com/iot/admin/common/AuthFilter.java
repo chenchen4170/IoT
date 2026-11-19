@@ -2,6 +2,7 @@ package com.iot.admin.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iot.admin.exception.BizException;
+import com.iot.admin.exception.ErrorCode;
 import com.iot.admin.service.TokenStore;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -62,6 +63,6 @@ public class AuthFilter extends OncePerRequestFilter {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         objectMapper.writeValue(response.getWriter(),
-                R.error(HttpStatus.UNAUTHORIZED.value(), "Unauthorized"));
+                R.error(ErrorCode.UNAUTHORIZED.getCode(), ErrorCode.UNAUTHORIZED.getMessage()));
     }
 }

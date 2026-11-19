@@ -39,7 +39,7 @@ class GlobalExceptionHandlerTests {
         mvc.perform(get("/test/business"))
                 .andExpect(status().isConflict())
                 .andExpect(header().exists(TraceIdFilter.HEADER))
-                .andExpect(jsonPath("$.code").value(409))
+                .andExpect(jsonPath("$.code").value("409"))
                 .andExpect(jsonPath("$.msg").value("Conflict"))
                 .andExpect(jsonPath("$.traceId").isNotEmpty())
                 .andExpect(jsonPath("$.data").doesNotExist());
@@ -50,7 +50,7 @@ class GlobalExceptionHandlerTests {
         mvc.perform(post("/test/validate").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.msg").value("Invalid request"));
     }
 
@@ -58,7 +58,7 @@ class GlobalExceptionHandlerTests {
     void explicitStatusKeepsReason() throws Exception {
         mvc.perform(get("/test/status"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value(404))
+                .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.msg").value("Item not found"));
     }
 
@@ -66,7 +66,7 @@ class GlobalExceptionHandlerTests {
     void unexpectedExceptionDoesNotExposeDetails() throws Exception {
         mvc.perform(get("/test/unexpected"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code").value(500))
+                .andExpect(jsonPath("$.code").value("500"))
                 .andExpect(jsonPath("$.msg").value("Internal server error"));
     }
 

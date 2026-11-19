@@ -21,3 +21,6 @@ CREATE TABLE IF NOT EXISTS product_category (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 )^^
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_product_category_code
+    ON product_category (category_code)^^

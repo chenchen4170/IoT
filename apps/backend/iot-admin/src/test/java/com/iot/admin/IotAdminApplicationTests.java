@@ -65,7 +65,7 @@ class IotAdminApplicationTests {
     @Test
     void healthUsesCommonResponse() throws Exception {
         mvc.perform(get("/api/admin/health")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.traceId").isNotEmpty())
                 .andExpect(jsonPath("$.msg").value(""))
                 .andExpect(jsonPath("$.data.status").value("UP"));
